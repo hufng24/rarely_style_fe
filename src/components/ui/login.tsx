@@ -4,7 +4,7 @@ import { App } from "antd";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React from "react";
-import 'animate.css';
+import "animate.css";
 
 // --- SVG Icon Components ---
 // Using functional components for SVG icons for better reusability and clarity.
@@ -85,11 +85,10 @@ const XIcon = () => (
 
 // --- Main App Component ---
 export default function Login() {
-  
-   const router = useRouter();
-   const { message } = App.useApp();
+  const router = useRouter();
+  const { message } = App.useApp();
 
-  const handleLogin = async  (e: React.FormEvent<HTMLFormElement>) => {
+  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
 
@@ -105,22 +104,31 @@ export default function Login() {
       password: password.toString().trim(),
     };
 
-   await login(loginData).then((response) => {
-       if (response.accessToken) {
+    await login(loginData)
+      .then((response) => {
+        if (response.accessToken) {
+          localStorage.setItem("accessToken", response.accessToken);
+          localStorage.setItem("refreshToken", response.refreshToken);
+          localStorage.setItem("userInfo", JSON.stringify(response.userInfo));
           message.success("Login successful!");
-          router.push("/"); 
-
-       }
-    }).catch((error) => {
-      console.error("Login failed:", error);
-    });
-
-    console.log("alo")
+          router.push("/");
+        }
+      })
+      .catch((error) => {
+        console.error("Login failed:", error);
+      });
   };
 
   return (
     // Main container with a custom background pattern and flexbox for centering. This setup is inherently responsive.
-    <div className="relative w-full flex items-center justify-center font-sans overflow-hidden p-4 bg-zinc-50 dark:bg-zinc-950">
+    <div
+      className="fixed inset-0 flex items-center justify-center font-sans overflow-hidden bg-zinc-50 dark:bg-zinc-950 p-4"
+      style={{
+        background: "linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)",
+        backgroundSize: "400% 400%",
+        animation: "gradientMove 3s ease infinite",
+      }}
+    >
       {/* Login Card. max-w-md ensures it doesn't get too wide on large screens, while w-full ensures it shrinks on small screens. */}
       <div className="relative w-full max-w-md p-8 sm:p-10 space-y-6 bg-white/80 dark:bg-zinc-900/60 backdrop-blur-xl rounded-2xl border border-zinc-200/50 dark:border-white/10 shadow-xl dark:shadow-2xl shadow-black/5 dark:shadow-black">
         {/* Header section with icon and title */}
@@ -128,7 +136,7 @@ export default function Login() {
           <div className="inline-flex p-3 bg-zinc-100/80 dark:bg-zinc-800/80 rounded-full border border-zinc-200/50 dark:border-white/10">
             <UserIcon />
           </div>
-          <h1 className="text-3xl font-bold text-zinc-900 dark:text-white animate__animated animate__backInDown">
+          <h1 className="text-3xl font-bold text-zinc-900 dark:text-white">
             Welcome back
           </h1>
         </div>
@@ -191,7 +199,7 @@ export default function Login() {
           </div>
           <button
             type="submit"
-            className="w-full p-3 mt-2 rounded-lg bg-zinc-900 dark:bg-zinc-800/80 border border-zinc-200/50 dark:border-white/10 text-white dark:text-white font-semibold shadow-[inset_0_1px_0_rgba(0,0,0,0.05)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] hover:bg-zinc-800 dark:hover:bg-zinc-700 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-zinc-900 focus:ring-zinc-500/50 dark:focus:ring-white/50"
+            className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-950 disabled:pointer-events-none disabled:opacity-50 bg-zinc-900 text-white shadow hover:bg-zinc-900/90 h-9 px-4 py-2 w-full"
           >
             Sign In
           </button>

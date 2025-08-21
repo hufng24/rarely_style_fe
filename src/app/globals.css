@@ -1,6 +1,29 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+@keyframes gradientMove {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.neon-white {
+  color: #ffffff;
+  text-shadow:
+    0 0 5px #fff,
+    0 0 10px #fff,
+    0 0 20px #fff,
+    0 0 30px #fff;
+}
+
+
+@keyframes neon-white-flicker {
+  0% { text-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 20px #fff; }
+  50% { text-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 30px #fff; }
+  100% { text-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 20px #fff; }
+}
+
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {

@@ -8,7 +8,7 @@ export interface UserInfo {
   id: number
   createdAt: string
   updatedAt: string
-  name: string
+  fullName: string
   email: string
   avatar: string
   phoneNumber: string

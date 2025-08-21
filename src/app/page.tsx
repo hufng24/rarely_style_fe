@@ -1,10 +1,9 @@
-import Login from "@/components/ui/login";
-import Image from "next/image";
 
+import Home1 from "@/components/ui/home";
 export default function Home() {
   return (
- <div>
-    trang tru
- </div>
+    <div>
+      <Home1 />
+    </div>
   );
 }
