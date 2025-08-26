@@ -6,13 +6,19 @@ export const login = async (data : LoginRequest) : Promise<LoginResponse> =>  {
     return response as unknown as LoginResponse;
 }
 
-export const registerUser = async (data: {
+export async function registerUser({
+  fullName,
+  email,
+  password,
+  avatar,
+}: {
   fullName: string;
   email: string;
   password: string;
-}) => {
+  avatar: string;
+}): Promise<any> {
   try {
-    const res = await api.post("/auth/register", data);
+    const res = await api.post("/auth/register", { fullName, email, password, avatar });
     return res.data;
   } catch (error: any) {
     throw new Error(error.response?.data?.message || "Register failed");

@@ -1,9 +1,15 @@
 "use client";
 import { registerUser } from "@/services/authen-service";
-import { App, message } from "antd";
+import { App, Button, message, Upload } from "antd";
+import { UploadOutlined } from "@ant-design/icons";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useState, useRef } from "react";
+import {
+  RcFile,
+  UploadChangeParam,
+  UploadFile,
+} from "antd/es/upload/interface";
 
 const UserIcon: React.FC = () => (
   <svg
@@ -199,9 +205,16 @@ const Register: React.FC = () => {
   const router = useRouter();
   const { message } = App.useApp();
   const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [showConfirmPassword, setShowConfirmPassword] =
+    useState<boolean>(false);
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
+  const [confirmPassword, setConfirmPassword] = useState<string>("");
+
   const [fullName, setFullName] = useState<string>("");
+  const [uploading, setUploading] = useState(false);
+  const [avatarUrls, setAvatarUrls] = useState<string[]>([]);
+  const [imageUrl, setImageUrl] = useState<string>("");
 
   const cardRef = useRef<HTMLDivElement>(null);
 
@@ -209,11 +222,62 @@ const Register: React.FC = () => {
     setShowPassword(!showPassword);
   };
 
+  const toggleConfirmPasswordVisibility = () => {
+    setShowConfirmPassword(!showConfirmPassword);
+  };
+  const beforeUpload = (file: RcFile) => {
+    const isJpgOrPng =
+      file.type === "image/jpeg" ||
+      file.type === "image/png" ||
+      file.type === "image/jpg";
+    if (!isJpgOrPng) {
+      message.error("Chỉ được upload file JPG/PNG!");
+    }
+    const isLt2M = file.size / 1024 / 1024 < 2;
+    if (!isLt2M) {
+      message.error("Ảnh phải nhỏ hơn 2MB!");
+    }
+    return isJpgOrPng && isLt2M;
+  };
+
+  // xử lý sau khi upload
+  const handleChange = async (info: UploadChangeParam<UploadFile>) => {
+    if (info.file.status === "uploading") {
+      setUploading(true);
+      return;
+    }
+    if (info.file.status === "done") {
+      setUploading(false);
+      try {
+        const res = info.file.response; // response từ BE
+        if (res?.file && res.file[0]?.url) {
+          setImageUrl(res.file[0].url);
+          setAvatarUrls([res.file[0].url]);
+          message.success("Upload thành công!");
+        }
+      } catch (err) {
+        message.error("Có lỗi khi upload!");
+      }
+    }
+  };
+
+  const uploadButton = (
+    <div>
+      <UploadOutlined />
+      <div style={{ marginTop: 8 }}>Upload</div>
+    </div>
+  );
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (password !== confirmPassword) {
+      message.error("Passwords do not match");
+      return;
+    }
+
     try {
-      await registerUser({ fullName, email, password });
+      await registerUser({ fullName, email, password, avatar: avatarUrls[0] });
       message.success("Register success!");
       router.push("/login");
     } catch (err: any) {
@@ -222,119 +286,112 @@ const Register: React.FC = () => {
   };
 
   return (
-    <>
-      <div className="flex min-h-screen items-center justify-center p-6">
-        <div className="w-full max-w-sm relative">
-          {/* Main Card with shadcn/ui styling */}
-          <div
-            ref={cardRef}
-            className="relative bg-white dark:bg-black border border-border rounded-lg p-6 shadow-sm transition-all duration-200 hover:shadow-md"
-          >
-            {/* Header */}
-            <div className="flex flex-col space-y-2 text-center mb-6">
-              <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-                Create an account
-              </h1>
-              <p className="text-sm text-muted-foreground">
-                Enter your details below to create your account
-              </p>
-            </div>
-
-            <form className="space-y-4" onSubmit={handleSubmit}>
-              {/* Full Name Input */}
-              <div className="space-y-2">
-                <FloatingLabelInput
-                  id="fullName"
-                  type="text"
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  placeholder="Full Name"
-                  icon={<UserIcon />}
+    <div className="flex min-h-screen items-center justify-center p-6">
+      <div className="w-full max-w-sm relative">
+        <div
+          ref={cardRef}
+          className="relative bg-white dark:bg-black border border-border rounded-lg p-6 shadow-sm transition-all duration-200 hover:shadow-md"
+        >
+          {/* Header */}
+          <div className="flex flex-col space-y-2 text-center mb-6">
+            <h1 className="text-2xl font-semibold tracking-tight text-foreground">
+              Create an account
+            </h1>
+            <p className="text-sm text-muted-foreground">
+              Enter your details below to create your account
+            </p>
+          </div>
+          {/* Upload Avatar */}
+          <div className="flex justify-center mb-4">
+            <Upload
+              name="files"
+              listType="picture-circle"
+              className="avatar-uploader"
+              showUploadList={false}
+              action="http://localhost:8080/api/v1/images"
+              beforeUpload={beforeUpload}
+              onChange={handleChange}
+            >
+              {imageUrl ? (
+                <img
+                  src={imageUrl}
+                  alt="avatar"
+                  className="w-full h-full object-cover rounded-full"
                 />
-              </div>
+              ) : (
+                uploadButton
+              )}
+            </Upload>
+          </div>
 
-              {/* Email Input */}
-              <div className="space-y-2">
-                <FloatingLabelInput
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Email"
-                  icon={<MailIcon />}
-                />
-              </div>
+          <form className="space-y-4" onSubmit={handleSubmit}>
+            {/* Full Name */}
+            <FloatingLabelInput
+              id="fullName"
+              type="text"
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+              placeholder="Full Name"
+              icon={<UserIcon />}
+            />
 
-              {/* Password Input */}
-              <div className="space-y-2">
-                <FloatingLabelInput
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Password"
-                  icon={<LockIcon />}
-                  rightIcon={showPassword ? <EyeOffIcon /> : <EyeIcon />}
-                  onRightIconClick={togglePasswordVisibility}
-                />
-              </div>
+            {/* Email */}
+            <FloatingLabelInput
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Email"
+              icon={<MailIcon />}
+            />
 
-              {/* Submit Button */}
-              <button
-                type="submit"
-                className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-white hover:bg-primary/90 h-10 px-4 py-2 w-full"
+            {/* Password */}
+            <FloatingLabelInput
+              id="password"
+              type={showPassword ? "text" : "password"}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Password"
+              icon={<LockIcon />}
+              rightIcon={showPassword ? <EyeOffIcon /> : <EyeIcon />}
+              onRightIconClick={togglePasswordVisibility}
+            />
+
+            <FloatingLabelInput
+              id="confirmPassword"
+              type={showConfirmPassword ? "text" : "password"}
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              placeholder="ConfirmPassword"
+              icon={<LockIcon />}
+              rightIcon={showConfirmPassword ? <EyeOffIcon /> : <EyeIcon />}
+              onRightIconClick={toggleConfirmPasswordVisibility}
+            />
+
+            {/* Submit */}
+            <button
+              type="submit"
+              className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium bg-primary text-white hover:bg-primary/90 h-10 px-4 py-2 w-full transition-colors"
+            >
+              Create Account
+            </button>
+          </form>
+
+          {/* Footer */}
+          <div className="mt-6 text-center text-sm">
+            <span className="text-muted-foreground">
+              Already have an account?{" "}
+              <Link
+                href="/login"
+                className="underline underline-offset-4 hover:text-primary transition-colors"
               >
-                Create Account
-              </button>
-            </form>
-
-            {/* Divider */}
-            <div className="relative my-6">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t border-border" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-white dark:bg-black px-2 text-muted-foreground">
-                  Or continue with
-                </span>
-              </div>
-            </div>
-
-            {/* Social Login */}
-            <div className="grid grid-cols-2 gap-4">
-              <button
-                type="button"
-                className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2"
-              >
-                <GitHubIcon />
-                <span className="ml-2">GitHub</span>
-              </button>
-              <button
-                type="button"
-                className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2"
-              >
-                <GoogleIcon />
-                <span className="ml-2">Google</span>
-              </button>
-            </div>
-
-            {/* Footer */}
-            <div className="mt-6 text-center text-sm">
-              <span className="text-muted-foreground">
-                Already have an account?{" "}
-                <Link
-                  href="/login"
-                  className="underline underline-offset-4 hover:text-primary transition-colors"
-                >
-                  Sign in
-                </Link>
-              </span>
-            </div>
+                Sign in
+              </Link>
+            </span>
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 };
-
 export default Register;
