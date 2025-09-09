@@ -213,7 +213,7 @@ export default function Login() {
               href="/register"
               className="font-medium text-zinc-900 dark:text-white hover:underline"
             >
-              Đăng kí
+              Sign Up
             </Link>
           </p>
           <a
