@@ -3,21 +3,14 @@
 import { useState } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Eye, Edit, Search } from "lucide-react"
 import { Pagination } from "@/components/pagination"
+import { ColorResponse } from "@/types/response/color-response"
 
-export interface Color {
-  id: number
-  code: string
-  name: string
-  createdAt: string
-}
 
 interface ColorTableProps {
-  colors: Color[]
+  colors: ColorResponse[]
   currentPage: number
   onPageChange: (page: number) => void
   itemsPerPage: number

@@ -1,32 +1,29 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Card, CardContent } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Input } from "@/components/ui/input"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { Eye, Edit, Trash2, Search, Plus } from "lucide-react"
-import { Pagination } from "@/components/pagination"
+import { useState } from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Eye, Edit, Trash2, Search, Plus } from "lucide-react";
+import { Pagination } from "@/components/pagination";
+import { UserResponse } from "@/types/response/user-response";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { formatDate, formatGender } from "@/lib/utils";
+import { Metadata } from "@/types/response/base-response";
 
-interface User {
-  id: number
-  name: string
-  email: string
-  phone: string
-  role: string
-  status: string
-  lastLogin: string
-}
 
 interface UsersTableProps {
-  users: User[]
-  currentPage: number
-  onPageChange: (page: number) => void
-  onAddUser: () => void
-  onEditUser: (user: User) => void
-  onDeleteUser: (user: User) => void
-  itemsPerPage: number
+  users: UserResponse[];
+  currentPage: number;
+  onPageChange: (page: number) => void;
+  onAddUser: () => void;
+  onEditUser: (user: UserResponse) => void;
+  onDeleteUser: (user: UserResponse) => void;
+  itemsPerPage: number;
+  metadata: Metadata | undefined;
+  onChangeFilter: (valueSearch:string) => void
+  searchTerm:string
 }
 
 export function UsersTable({
@@ -37,28 +34,26 @@ export function UsersTable({
   onEditUser,
   onDeleteUser,
   itemsPerPage,
+  searchTerm,
+  onChangeFilter,
+  metadata
 }: UsersTableProps) {
-  const [searchTerm, setSearchTerm] = useState("")
 
-  const filteredUsers = users.filter(
-    (user) =>
-      user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.role.toLowerCase().includes(searchTerm.toLowerCase()),
-  )
 
-  const startIndex = (currentPage - 1) * itemsPerPage
-  const endIndex = startIndex + itemsPerPage
-  const paginatedUsers = filteredUsers.slice(startIndex, endIndex)
-  const totalPages = Math.ceil(filteredUsers.length / itemsPerPage)
 
+ 
   const getStatusBadge = (status: string) => {
     const statusConfig = {
       active: { label: "Hoạt động", variant: "default" as const },
       inactive: { label: "Không hoạt động", variant: "secondary" as const },
-    }
-    return statusConfig[status as keyof typeof statusConfig] || { label: status, variant: "outline" as const }
-  }
+    };
+    return (
+      statusConfig[status as keyof typeof statusConfig] || {
+        label: status,
+        variant: "outline" as const,
+      }
+    );
+  };
 
   const getRoleBadge = (role: string) => {
     const roleConfig = {
@@ -66,18 +61,30 @@ export function UsersTable({
       manager: { label: "Quản lý", variant: "secondary" as const },
       staff: { label: "Nhân viên", variant: "outline" as const },
       customer: { label: "Khách hàng", variant: "secondary" as const },
-    }
-    return roleConfig[role as keyof typeof roleConfig] || { label: role, variant: "outline" as const }
-  }
+    };
+    return (
+      roleConfig[role as keyof typeof roleConfig] || {
+        label: role,
+        variant: "outline" as const,
+      }
+    );
+  };
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Quản lý người dùng</h1>
-          <p className="text-muted-foreground">Quản lý tài khoản và phân quyền người dùng</p>
+          <h1 className="text-3xl font-bold text-foreground">
+            Quản lý người dùng
+          </h1>
+          <p className="text-muted-foreground">
+            Quản lý tài khoản và phân quyền người dùng
+          </p>
         </div>
-        <Button className="bg-primary text-primary-foreground hover:bg-primary/90" onClick={onAddUser}>
+        <Button
+          className="bg-primary text-primary-foreground hover:bg-primary/90"
+          onClick={onAddUser}
+        >
           <Plus className="h-4 w-4 mr-2" />
           Thêm người dùng
         </Button>
@@ -90,7 +97,7 @@ export function UsersTable({
             placeholder="Tìm kiếm người dùng..."
             className="pl-10"
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={(e) => onChangeFilter(e.target.value)}
           />
         </div>
       </div>
@@ -101,47 +108,92 @@ export function UsersTable({
             <table className="w-full">
               <thead className="border-b bg-muted/50">
                 <tr>
-                  <th className="text-left p-4 font-medium text-muted-foreground">Người dùng</th>
-                  <th className="text-left p-4 font-medium text-muted-foreground">Email</th>
-                  <th className="text-left p-4 font-medium text-muted-foreground">Số điện thoại</th>
-                  <th className="text-left p-4 font-medium text-muted-foreground">Vai trò</th>
-                  <th className="text-left p-4 font-medium text-muted-foreground">Trạng thái</th>
-                  <th className="text-left p-4 font-medium text-muted-foreground">Đăng nhập cuối</th>
-                  <th className="text-left p-4 font-medium text-muted-foreground">Thao tác</th>
+                  <th className="text-left p-4 font-medium text-muted-foreground">
+                    ID
+                  </th>
+                  <th className="text-left p-4 font-medium text-muted-foreground">
+                    Họ và tên
+                  </th>
+                  <th className="text-left p-4 font-medium text-muted-foreground">
+                    Email
+                  </th>
+                  <th className="text-left p-4 font-medium text-muted-foreground">
+                    Số điện thoại
+                  </th>
+                  <th className="text-left p-4 font-medium text-muted-foreground">
+                    Vai trò
+                  </th>
+                  <th className="text-left p-4 font-medium text-muted-foreground">
+                    Giới tính
+                  </th>
+                  <th className="text-left p-4 font-medium text-muted-foreground">
+                    Trạng thái
+                  </th>
+                  <th className="text-left p-4 font-medium text-muted-foreground">
+                    Ngày tạo
+                  </th>
+                  <th className="text-left p-4 font-medium text-muted-foreground">
+                    Thao tác
+                  </th>
                 </tr>
               </thead>
               <tbody>
-                {paginatedUsers.map((user) => (
+                {users.map((user) => (
                   <tr key={user.id} className="border-b hover:bg-muted/30">
                     <td className="p-4">
                       <div className="flex items-center gap-3">
-                        <Avatar className="h-8 w-8">
-                          <AvatarFallback className="bg-primary text-primary-foreground text-xs">
-                            {user.name
-                              .split(" ")
-                              .map((n) => n[0])
-                              .join("")
-                              .toUpperCase()}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className="font-medium text-foreground">{user.name}</div>
+                        <div className="font-medium text-foreground">
+                          {user.id}
+                        </div>
                       </div>
                     </td>
+                    <div className="flex items-center gap-3 p-4 text-muted-foreground">
+                       <Avatar className="h-8 w-8">
+                          <AvatarImage src={user.avatar} alt={user.fullName} />
+                          <AvatarFallback>
+                            {user.fullName.charAt(0).toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                      {user.fullName}
+                    </div>
                     <td className="p-4 text-muted-foreground">{user.email}</td>
-                    <td className="p-4 text-muted-foreground">{user.phone}</td>
-                    <td className="p-4">
-                      <Badge variant={getRoleBadge(user.role).variant}>{getRoleBadge(user.role).label}</Badge>
+                    <td className="p-4 text-muted-foreground">
+                      {user.phoneNumber || "Không có số điện thoại"}
                     </td>
                     <td className="p-4">
-                      <Badge variant={getStatusBadge(user.status).variant}>{getStatusBadge(user.status).label}</Badge>
+                      {user.roles && user.roles.length > 0 ? (
+                        user.roles.map((role) => (
+                          <Badge
+                            key={role}
+                            variant={getRoleBadge(role).variant}
+                          >
+                            {getRoleBadge(role).label}
+                          </Badge>
+                        ))
+                      ) : (
+                        <Badge variant="secondary">No Role</Badge>
+                      )}
                     </td>
-                    <td className="p-4 text-muted-foreground">{user.lastLogin}</td>
+                    <td className="p-4 text-muted-foreground">{formatGender(user.gender)}</td>
+
+                    <td className="p-4">
+                      <Badge variant={getStatusBadge(user.status).variant}>
+                        {getStatusBadge(user.status).label}
+                      </Badge>
+                    </td>
+                    <td className="p-4 text-muted-foreground">
+                      {formatDate(user.createdAt)}
+                    </td>
                     <td className="p-4">
                       <div className="flex items-center gap-2">
                         <Button variant="ghost" size="sm">
                           <Eye className="h-4 w-4" />
                         </Button>
-                        <Button variant="ghost" size="sm" onClick={() => onEditUser(user)}>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => onEditUser(user)}
+                        >
                           <Edit className="h-4 w-4" />
                         </Button>
                         <Button
@@ -160,10 +212,14 @@ export function UsersTable({
             </table>
           </div>
           <div className="p-4 border-t">
-            <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={onPageChange} />
+            <Pagination
+              currentPage={currentPage}
+              totalPages={Number(metadata?.totalPage)}
+              onPageChange={onPageChange}
+            />
           </div>
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }
