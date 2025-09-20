@@ -57,6 +57,8 @@ import { defaultProducts } from "@/config/products";
 import { BASE_URL } from "@/constant/base";
 import { BaseResponse } from "@/types/response/base-response";
 import { getColor} from "@/services/color-service"
+import TestTable from "@/app/test-table/page";
+import SizePage from "@/app/size/page";
 
 
 export function AdminDashboard() {
@@ -75,7 +77,7 @@ export function AdminDashboard() {
   const [currentProductPage, setCurrentProductPage] = useState(1);
   const [currentOrderPage, setCurrentOrderPage] = useState(1);
   const [currentUserPage, setCurrentUserPage] = useState(1);
-  const [currentCustomerPage, setCurrentCustomerPage] = useState(1);
+  const [currentColorPage, setCurrentColorPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const itemsPerPage = 5;
 
@@ -97,7 +99,8 @@ export function AdminDashboard() {
     { id: "dashboard", label: "Dashboard", icon: BarChart3 },
     { id: "products", label: "Sản phẩm", icon: Package },
     { id: "orders", label: "Đơn hàng", icon: ShoppingCart },
-    { id: "customers", label: "Màu Sắc", icon: Users },
+    { id: "colors", label: "Màu Sắc", icon: Users },
+    { id: "sizes", label: "Kích thước", icon: ShoppingCart },
     { id: "users", label: "Người dùng", icon: UserPlus },
     { id: "settings", label: "Cài đặt", icon: Settings },
   ];
@@ -301,14 +304,14 @@ export function AdminDashboard() {
           />
         );
 
-      case "customers":
+      case "colors":
         return (
-          <ColorsTable
-            colors={colorData || []}
-            currentPage={currentCustomerPage}
-            onPageChange={setCurrentCustomerPage}
-            itemsPerPage={itemsPerPage}
-          />
+          <TestTable/>
+        );
+
+      case "sizes":
+        return (
+          <SizePage/>
         );
 
       case "users":

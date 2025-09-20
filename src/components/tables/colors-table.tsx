@@ -7,29 +7,31 @@ import { Input } from "@/components/ui/input"
 import { Eye, Edit, Search } from "lucide-react"
 import { Pagination } from "@/components/pagination"
 import { ColorResponse } from "@/types/response/color-response"
+import { formatDate } from "@/lib/utils"
+import { Metadata } from "@/types/response/base-response"
 
 
 interface ColorTableProps {
   colors: ColorResponse[]
   currentPage: number
   onPageChange: (page: number) => void
+  onChangeFilter: (valueSearch:String) => void
   itemsPerPage: number
+  searchTerm: string
+  metadata: Metadata | undefined;
 }
 
-export function ColorsTable({ colors, currentPage, onPageChange, itemsPerPage }: ColorTableProps) {
-  const [searchTerm, setSearchTerm] = useState("")
+export function ColorsTable({
+  colors,
+  currentPage,
+  onPageChange,
+  itemsPerPage,
+  onChangeFilter,
+  searchTerm,
+  metadata
+}: ColorTableProps) {
 
-  const filteredColors = colors.filter(
-    (color) =>
-      color.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      color.code.toLowerCase().includes(searchTerm.toLowerCase()) 
-      // color.phone.includes(searchTerm),
-  )
-
-  const startIndex = (currentPage - 1) * itemsPerPage
-  const endIndex = startIndex + itemsPerPage
-  const paginatedColors = filteredColors.slice(startIndex, endIndex)
-  const totalPages = Math.ceil(filteredColors.length / itemsPerPage)
+  
 
  
 
@@ -47,7 +49,7 @@ export function ColorsTable({ colors, currentPage, onPageChange, itemsPerPage }:
             placeholder="Tìm kiếm màu sắc..."
             className="pl-10"
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={(e) => onChangeFilter(e.target.value)}
           />
         </div>
       </div>
@@ -66,7 +68,7 @@ export function ColorsTable({ colors, currentPage, onPageChange, itemsPerPage }:
                 </tr>
               </thead>
               <tbody>
-                {paginatedColors.map((color) => (
+                {colors.map((color) => (
                   <tr key={color.id} className="border-b hover:bg-muted/30">
                     <td className="p-4">
                       <div className="flex items-center gap-3">
@@ -75,7 +77,7 @@ export function ColorsTable({ colors, currentPage, onPageChange, itemsPerPage }:
                     </td>
                     <td className="p-4 text-muted-foreground">{color.code}</td>
                     <td className="p-4 text-muted-foreground">{color.name}</td>
-                    <td className="p-4 text-muted-foreground">{color.createdAt}</td>
+                    <td className="p-4 text-muted-foreground">{formatDate(color.createdAt)}</td>
                     <td className="p-4">
                       <div className="flex items-center gap-2">
                         <Button variant="ghost" size="sm">
@@ -92,7 +94,7 @@ export function ColorsTable({ colors, currentPage, onPageChange, itemsPerPage }:
             </table>
           </div>
           <div className="p-4 border-t">
-            <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={onPageChange} />
+            <Pagination currentPage={currentPage} totalPages={Number(metadata?.totalPage)} onPageChange={onPageChange} />
           </div>
         </CardContent>
       </Card>
