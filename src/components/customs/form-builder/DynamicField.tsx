@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Checkbox } from "@/components/ui/checkbox"
+import { ApiCombobox } from "@/components/customs/combo-box/api-combobox"
 import { cn } from "@/lib/utils"
 import { useState, useEffect } from "react"
 
@@ -155,15 +156,24 @@ export function DynamicField<TFormValues extends Record<string, any>>({ field, v
         </div>
       )}
 
-      {field.type === "combobox" && "options" in field && (
-        <Select value={value !== undefined && value !== null ? String(value) : undefined} onValueChange={handleChange}>
-          <SelectTrigger id={name} disabled={field.disabled} className={cn(fieldError && "border-destructive")}>
-            <SelectValue placeholder={field.placeholder} />
-          </SelectTrigger>
-          <SelectContent>
-            {renderOptions(field.options)}
-          </SelectContent>
-        </Select>
+      {field.type === "combobox" && "apiUrl" in field && (
+        <ApiCombobox
+          apiUrl={field.apiUrl}
+          placeholder={field.placeholder}
+          searchPlaceholder={field.searchPlaceholder}
+          emptyText={field.emptyText}
+          value={value !== undefined && value !== null ? String(value) : undefined}
+          onChange={(selectedValue, option) => handleChange(selectedValue)}
+          disabled={field.disabled}
+          className={cn(fieldError && "border-destructive")}
+          searchParam={field.searchParam}
+          pageParam={field.pageParam}
+          limitParam={field.limitParam}
+          pageSize={field.pageSize}
+          transformResponse={field.transformResponse}
+          additionalParams={field.additionalParams}
+          headers={field.headers}
+        />
       )}
 
       {field.type === "date" && (

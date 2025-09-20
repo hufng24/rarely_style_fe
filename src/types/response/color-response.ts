@@ -3,4 +3,5 @@ export interface ColorResponse {
   code: string
   name: string
   createdAt: string
+  hungId:number
 }

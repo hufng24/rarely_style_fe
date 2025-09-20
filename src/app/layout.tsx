@@ -2,8 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AntdProvider } from "@/components/AntdProvider";
-// import "antd/dist/reset.css"; dc 
-
+// import "antd/dist/reset.css"; // nếu bạn muốn reset css của antd thì mở comment
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

@@ -40,8 +40,22 @@ export interface TextFieldConfig<T extends Record<string, any>> extends BaseFiel
 }
 
 export interface SelectFieldConfig<T extends Record<string, any>> extends BaseFieldConfig<T> {
-  type: "select" | "combobox"
+  type: "select"
   options: OptionItem[]
+}
+
+export interface ApiComboboxFieldConfig<T extends Record<string, any>> extends BaseFieldConfig<T> {
+  type: "combobox"
+  apiUrl: string
+  searchPlaceholder?: string
+  emptyText?: string
+  searchParam?: string
+  pageParam?: string
+  limitParam?: string
+  pageSize?: number
+  transformResponse?: (response: any) => any
+  additionalParams?: Record<string, string | number>
+  headers?: Record<string, string>
 }
 
 export interface RadioFieldConfig<T extends Record<string, any>> extends BaseFieldConfig<T> {
@@ -60,6 +74,7 @@ export interface DateFieldConfig<T extends Record<string, any>> extends BaseFiel
 export type FieldConfig<T extends Record<string, any>> =
   | TextFieldConfig<T>
   | SelectFieldConfig<T>
+  | ApiComboboxFieldConfig<T>
   | RadioFieldConfig<T>
   | CheckboxFieldConfig<T>
   | DateFieldConfig<T>
